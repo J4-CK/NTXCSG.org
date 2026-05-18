@@ -1,0 +1,19 @@
+# NTXCSG - North Texas Cyber Security Group
+# https://ntxcsg.org
+
+User-agent: *
+Disallow: /admin
+Disallow: /flag
+Allow: /
+
+# Crawl responsibly
+Crawl-delay: 1
+
+# Sitemap
+Sitemap: https://ntxcsg.org/sitemap.xml
+
+# For the humans: /humans.txt
+
+# You won't find anything at /flag.
+# (you should check anyway)
+# flag{r0b0ts_d0nt_st0p_h4ck3rs}
