@@ -1,0 +1,22 @@
+/* TEAM */
+Organization: North Texas Cyber Security Group (NTXCSG)
+Founded: February 2013
+Location: Lewisville, TX (Dallas-Fort Worth area)
+Contact: meetup.com/NTXCSG
+
+Founder: Don Ngo
+Current Organizer: Darin F.
+
+/* SITE */
+Built with: Next.js, Tailwind CSS, v0
+Last update: 2026
+Standards: HTML5, CSS3, TypeScript
+
+/* THANKS */
+To all 1,600+ members who make this community what it is.
+To everyone who has presented, attended, or supported NTXCSG since 2013.
+
+/* CONNECT */
+Meetup: meetup.com/NTXCSG
+Twitter/X: @ntxcsg
+LinkedIn: linkedin.com/groups/12028350
