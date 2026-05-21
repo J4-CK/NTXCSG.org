@@ -446,61 +446,116 @@ export default function CTFPage() {
       </main>
 
       {/* Footer — matches main site */}
-      <footer className="py-10 px-6 md:px-10" style={{ background: "var(--bg-elevated)" }}>
+      <footer className="pt-16 pb-12 md:pt-16 md:pb-12 px-6 md:px-10" style={{ background: "var(--bg-elevated)" }}>
         <div className="container mx-auto max-w-[1100px]">
-          <div className="flex flex-col items-center text-center">
-            {/* Centered logo */}
-            <div className="mb-6">
+          
+          {/* Upper Footer — Two Column Grid */}
+          <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-12 md:gap-12 mb-10">
+            
+            {/* Left Column — Logo + Mission */}
+            <div>
               <img 
                 src="/NTXCSG_fulllogo_white.png" 
                 alt="NTXCSG - North Texas Cybersecurity Group" 
-                className="w-[120px] md:w-[140px] h-auto"
+                className="w-[180px] h-auto mb-5"
               />
+              <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+                A practitioner-led cybersecurity community in the Dallas-Fort Worth area. Open to all skill levels. Travelers welcome.
+              </p>
             </div>
             
-            {/* Social links */}
-            <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6">
-              {Object.values(socialLinks).map((link) => (
-                <a 
-                  key={link.label} 
-                  href={link.url} 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="node-link text-xs" 
-                  style={{ color: "var(--gray)" }}
+            {/* Right Column — Nav + Community */}
+            <div className="grid grid-cols-2 gap-8 md:gap-12">
+              
+              {/* Sub-column A — Navigate */}
+              <div>
+                <h4 
+                  className="text-[11px] uppercase tracking-[0.15em] mb-4" 
+                  style={{ fontFamily: "var(--font-display)", color: "rgba(57, 255, 20, 0.6)" }}
                 >
-                  {link.label}
-                </a>
-              ))}
+                  Navigate
+                </h4>
+                <nav className="flex flex-col gap-3">
+                  <a href="/" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Home</a>
+                  <a href="/#calendar" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Meetings</a>
+                  <a href="/#practitioners" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Why We Exist</a>
+                  <a href="/#history" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Our History</a>
+                  <a href="/ctf" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>CTF</a>
+                </nav>
+              </div>
+              
+              {/* Sub-column B — Community */}
+              <div>
+                <h4 
+                  className="text-[11px] uppercase tracking-[0.15em] mb-4" 
+                  style={{ fontFamily: "var(--font-display)", color: "rgba(57, 255, 20, 0.6)" }}
+                >
+                  Community
+                </h4>
+                <nav className="flex flex-col gap-3">
+                  {Object.values(socialLinks).map((link) => (
+                    <a 
+                      key={link.label} 
+                      href={link.url} 
+                      target="_blank" 
+                      rel="noopener noreferrer" 
+                      className="text-[14px] transition-colors hover:text-white" 
+                      style={{ color: "rgba(255,255,255,0.7)" }}
+                    >
+                      {link.label}
+                    </a>
+                  ))}
+                </nav>
+              </div>
+            </div>
+          </div>
+          
+          {/* Circuit Trace Divider */}
+          <div className="relative my-10">
+            <div className="w-full h-px" style={{ background: "rgba(57, 255, 20, 0.2)" }} />
+            <div 
+              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full"
+              style={{ background: "rgba(57, 255, 20, 0.4)" }}
+            />
+          </div>
+          
+          {/* Bottom Bar */}
+          <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
+            
+            {/* Left — Copyright (centered on mobile, left on desktop) */}
+            <span className="text-[12px] order-2 md:order-1 text-center md:text-left" style={{ color: "rgba(255,255,255,0.4)" }}>
+              &copy; {new Date().getFullYear()} NTXCSG &middot; All rights reserved
+            </span>
+            
+            {/* Center — L0WJ4CK Signature */}
+            <div className="flex flex-col items-center justify-center order-1 md:order-2 text-center">
+              <a 
+                href="https://www.linkedin.com/in/jacksongiddens/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="group flex flex-col items-center transition-all"
+              >
+                <img 
+                  src="/l0wj4ck_signature.svg" 
+                  alt="L0WJ4CK" 
+                  className="w-[260px] md:w-[340px] h-auto opacity-50 transition-all duration-300 group-hover:opacity-100"
+                  style={{ filter: "drop-shadow(0 0 0px transparent)" }}
+                  onMouseEnter={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 8px rgba(57, 255, 20, 0.6))"}
+                  onMouseLeave={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 0px transparent)"}
+                />
+                <span 
+                  className="text-[11px] mt-2 text-center" 
+                  style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
+                >
+                  // designed &amp; built by L0WJ4CK
+                </span>
+              </a>
             </div>
             
-            {/* Divider */}
-            <div className="w-16 h-px mb-6" style={{ background: "var(--green-dim)" }} />
-            
-            {/* Stats */}
-            <div className="mb-4">
-              <span style={{ fontFamily: "var(--font-data)", fontSize: "10px", letterSpacing: "0.1em", color: "var(--green-dim)" }}>
-                UPTIME: {new Date().getFullYear() - 2013} YRS · EVENTS: {orgInfo.pastEvents}+ · STILL RUNNING
-              </span>
-            </div>
-            
-            {/* Credit */}
-            <a 
-              href="https://www.linkedin.com/in/jacksongiddens/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="inline-flex items-center justify-center gap-2 transition-opacity hover:opacity-70"
-            >
-              <span style={{ fontFamily: "var(--font-data)", fontSize: "9px", color: "var(--gray-dim)" }}>
-                Designed &amp; built by
-              </span>
-              <img 
-                src="/l0wj4ck_signature.svg" 
-                alt="L0WJ4CK" 
-                className="h-3 w-auto"
-                style={{ opacity: 0.7 }}
-              />
-            </a>
+            {/* Right — Placeholder (hidden on mobile) */}
+            <span className="text-[12px] order-3 hidden md:block md:text-right" style={{ color: "rgba(255,255,255,0.2)", minWidth: "140px" }}>
+              {/* Reserved for future link */}
+            </span>
           </div>
         </div>
       </footer>

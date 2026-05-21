@@ -181,8 +181,8 @@ export const historyEras = [
     year: "2017-2019",
     headline: "GAINING GROUND",
     description:
-      "NTXCSG became a fixture in the North Texas security community—the place where practitioners went to hear real talks from people doing the work, not vendor pitches. Topics expanded into ICS/SCADA, API security, cloud architecture, and social engineering.",
-    logEntry: "NO VENDOR PITCHES",
+      "NTXCSG became a fixture in the North Texas security community—the place where practitioners went to hear real talks from people doing the work. Topics expanded into ICS/SCADA, API security, cloud architecture, and social engineering.",
+    logEntry: "TOPICS EXPANDED",
   },
   {
     year: "2020-2022",

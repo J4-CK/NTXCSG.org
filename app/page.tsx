@@ -257,55 +257,6 @@ function IntroAnimation({ onComplete }: { onComplete: () => void }) {
 }
 
 /* ============================================================================
-   HEX WATERFALL CANVAS
-   ============================================================================ */
-
-function HexWaterfall() {
-  const canvasRef = useRef<HTMLCanvasElement>(null)
-
-  useEffect(() => {
-    const canvas = canvasRef.current
-    if (!canvas) return
-    const ctx = canvas.getContext('2d')
-    if (!ctx) return
-
-    const resize = () => { canvas.width = canvas.offsetWidth; canvas.height = canvas.offsetHeight }
-    resize()
-    window.addEventListener('resize', resize)
-
-    const cols = Math.floor(canvas.width / 14)
-    const rows = Math.floor(canvas.height / 14) + 2
-    const data: number[][] = Array.from({ length: cols }, () => Array.from({ length: rows }, () => Math.floor(Math.random() * 256)))
-    let offset = 0
-    let animationId: number
-
-    function frame() {
-      if (!ctx || !canvas) return
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      ctx.font = '10px "Share Tech Mono", monospace'
-      ctx.fillStyle = '#39FF14'
-      for (let c = 0; c < cols; c++) {
-        for (let r = 0; r < rows; r++) {
-          ctx.fillText(data[c][r].toString(16).padStart(2, '0').toUpperCase(), c * 14, (r * 14 - (offset % 14)))
-        }
-      }
-      offset += 0.3
-      if (Math.random() < 0.01) {
-        const c = Math.floor(Math.random() * cols)
-        const r = Math.floor(Math.random() * rows)
-        data[c][r] = Math.floor(Math.random() * 256)
-      }
-      animationId = requestAnimationFrame(frame)
-    }
-    
-    if (!window.matchMedia('(prefers-reduced-motion: reduce)').matches) frame()
-    return () => { window.removeEventListener('resize', resize); cancelAnimationFrame(animationId) }
-  }, [])
-
-  return <canvas ref={canvasRef} className="hex-waterfall" />
-}
-
-/* ============================================================================
    COUNTING ANIMATION
    ============================================================================ */
 
@@ -635,19 +586,19 @@ function MeetingsTerminal() {
 
   // Third Thursday calculation
   function getThirdThursday(year: number, month: number): Date {
-    let count = 0
-    for (let day = 1; day <= 31; day++) {
-      const d = new Date(year, month, day)
-      if (d.getMonth() !== month) break
-      if (d.getDay() === 4) {
-        count++
-        if (count === 3) {
-          d.setHours(18, 30, 0, 0) // 6:30 PM
-          return d
-        }
-      }
-    }
-    return new Date(year, month, 15, 18, 30)
+  let count = 0
+  for (let day = 1; day <= 31; day++) {
+  const d = new Date(year, month, day)
+  if (d.getMonth() !== month) break
+  if (d.getDay() === 4) {
+  count++
+  if (count === 3) {
+  d.setHours(19, 0, 0, 0) // 7:00 PM CST
+  return d
+  }
+  }
+  }
+  return new Date(year, month, 15, 19, 0)
   }
 
   // Memoize meeting dates to prevent infinite re-renders
@@ -767,23 +718,25 @@ function MeetingsTerminal() {
       <div className="terminal-content">
         {/* Left panel — Meeting details */}
         <div className="terminal-panel terminal-panel-left">
-          <div className="terminal-headline">&gt; Meets every 3rd Thursday</div>
-          
-          <div className="terminal-section">
-            <div className="terminal-label">DATE &amp; TIME</div>
-            <div className="terminal-date">{mounted ? formatLongDate(nextMeeting) : '---'}</div>
-            <div className="terminal-time">6:30 PM – 8:30 PM CST</div>
+          <div className="terminal-left-section">
+            <div className="terminal-headline">&gt; Meets every 3rd Thursday</div>
+            
+            <div className="terminal-section" style={{ marginBottom: 0 }}>
+              <div className="terminal-label">DATE &amp; TIME</div>
+              <div className="terminal-date">{mounted ? formatLongDate(nextMeeting) : '---'}</div>
+              <div className="terminal-time">7:00 PM – 9:00 PM CST</div>
+            </div>
           </div>
 
-          <div className="terminal-divider" />
-
-          <div className="terminal-section">
-            <div className="terminal-label">LOCATION</div>
-            <div className="terminal-venue">{meetingConfig.location.name}</div>
-            <div className="terminal-address">208 E Main St, Lewisville, TX 75057</div>
-            <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="terminal-btn-directions">
-              Get Directions &rarr;
-            </a>
+          <div className="terminal-left-section">
+            <div className="terminal-section" style={{ marginBottom: 0 }}>
+              <div className="terminal-label">LOCATION</div>
+              <div className="terminal-venue">{meetingConfig.location.name}</div>
+              <div className="terminal-address">208 E Main St, Lewisville, TX 75057</div>
+              <a href={googleMapsUrl} target="_blank" rel="noopener noreferrer" className="terminal-btn-directions">
+                Get Directions &rarr;
+              </a>
+            </div>
           </div>
         </div>
 
@@ -828,7 +781,7 @@ function MeetingsTerminal() {
                       >
                         <div className="terminal-popover-title">Monthly Meetup</div>
                         <div className="terminal-popover-date">{date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}</div>
-                        <div className="terminal-popover-time">6:30 PM CST</div>
+                        <div className="terminal-popover-time">7:00 PM CST</div>
                         <a href={eventsUrl} target="_blank" rel="noopener noreferrer" className="terminal-popover-rsvp">
                           RSVP &rarr;
                         </a>
@@ -1025,23 +978,22 @@ function HistoryAccordion() {
 
 export default function Home() {
   const [mounted, setMounted] = useState(false)
-  const [showIntro, setShowIntro] = useState(false)
+  const [showIntro, setShowIntro] = useState(true) // Start true to prevent flash
+  const [introComplete, setIntroComplete] = useState(false)
   const [daysUntil, setDaysUntil] = useState(0)
   const nextMeeting = useMemo(() => getNextMeetingDate(), [])
   const heroRef = useRef<HTMLElement>(null)
 
-  console.log("[v0] Home component rendering, showIntro:", false)
-
   useEffect(() => {
-    console.log("[v0] Home useEffect running")
     setMounted(true)
     const now = new Date()
     const diff = Math.ceil((nextMeeting.getTime() - now.getTime()) / (1000 * 60 * 60 * 24))
     setDaysUntil(diff)
     
-    // Only show intro animation if not seen this session
-    if (!sessionStorage.getItem('ntxcsg-intro-seen')) {
-      setShowIntro(true)
+    // Check if intro was already seen this session
+    if (sessionStorage.getItem('ntxcsg-intro-seen')) {
+      setShowIntro(false)
+      setIntroComplete(true)
     }
     
 
@@ -1100,6 +1052,7 @@ export default function Home() {
 
   const handleIntroComplete = useCallback(() => {
     setShowIntro(false)
+    setIntroComplete(true)
     sessionStorage.setItem('ntxcsg-intro-seen', '1')
   }, [])
 
@@ -1204,11 +1157,14 @@ export default function Home() {
   return (
     <>
       {showIntro && <IntroAnimation onComplete={handleIntroComplete} />}
-      <div className="grain-overlay" aria-hidden="true" />
-      <CursorTrace />
       
-      {/* Navigation */}
-      <header className="fixed top-0 left-0 right-0 z-50 nav-header">
+      {/* Hide all content until intro completes to prevent flash */}
+      <div style={{ visibility: introComplete ? 'visible' : 'hidden' }}>
+        <div className="grain-overlay" aria-hidden="true" />
+        <CursorTrace />
+        
+        {/* Navigation */}
+        <header className="fixed top-0 left-0 right-0 z-50 nav-header">
         <div className="container mx-auto max-w-[1100px] px-6 md:px-10">
           <nav className="flex items-center justify-between h-14 md:h-16" aria-label="Main navigation">
             <a href="#" aria-label="NTXCSG Home">
@@ -1343,11 +1299,10 @@ export default function Home() {
           </div>
 
           {/* Sub-section: THE RECORD — Background A (primary) */}
-          <div id="history" className="practitioners-subsection scroll-mt-20" style={{ background: "var(--bg-primary)" }}>
-            <SectionDivider position="right" />
-            <div className="container mx-auto max-w-[1100px] py-16 md:py-20">
-              <HexWaterfall />
-              <TraceDivider />
+  <div id="history" className="practitioners-subsection scroll-mt-20" style={{ background: "var(--bg-primary)" }}>
+  <SectionDivider position="right" />
+  <div className="container mx-auto max-w-[1100px] py-16 md:py-20">
+  <TraceDivider />
               <Section>
                 <SectionLabel>{sectionLabels.history}</SectionLabel>
                 <h3 className="text-2xl md:text-3xl font-bold mb-10" style={{ fontFamily: "var(--font-display)" }}>THE RECORD</h3>
@@ -1435,9 +1390,9 @@ export default function Home() {
                   <div className="organizer-info">
                     <div className="organizer-name">Darin Fredde</div>
                     <div className="organizer-title">NTXCSG Founder &amp; Host</div>
-                    <p className="organizer-bio">
-                      Security practitioner with over two decades in the industry. Founded NTXCSG in 2013 to give DFW security professionals a vendor-free space to learn, share, and connect.
-                    </p>
+  <p className="organizer-bio">
+  Security practitioner with over two decades in the industry. Founded NTXCSG in 2013 to give DFW security professionals a space to learn, share, and connect.
+  </p>
                   </div>
                   
                   {/* LinkedIn button — positioned on right side on desktop */}
@@ -1471,13 +1426,7 @@ export default function Home() {
                 {/* Left column — NTXCSG Social Links */}
                 <div className="network-social">
                   <div className="network-social-label">Connect with NTXCSG</div>
-                  <div className="network-social-icons">
-                    {/* Meetup */}
-                    <a href={socialLinks.meetup.url} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="Meetup">
-                      <svg viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M6.98 13.74c.07.42.15.93.46 1.24.38.38 1.04.22 1.4-.17.9-1 1.18-2.38 1.68-3.59.21-.52.5-1.12 1.06-1.27.64-.17 1.22.35 1.56.85.93 1.35 1.19 3.02 1.63 4.56.11.39.25.83.6 1.05.41.26.97.09 1.32-.25 1.19-1.16 1.23-3.06 1.63-4.63.15-.59.37-1.31.95-1.55.47-.19.98.08 1.32.42.86.87 1.14 2.14 1.64 3.23.28.6.74 1.27 1.43 1.33.74.07 1.28-.72 1.59-1.36.46-.97.67-2.04.6-3.1-.14-2.18-1.3-4.25-3.04-5.51-1.32-.96-2.93-1.47-4.55-1.63C13.03 3.12 9.58 4.26 7.44 6.64c-1.45 1.62-2.23 3.81-2.07 5.98.04.39.11.77.21 1.14-.57-.39-1.27-.67-1.97-.47-.87.25-1.38 1.18-1.43 2.06-.08 1.27.56 2.65 1.68 3.28.57.32 1.25.41 1.89.23.56-.16 1.05-.53 1.38-1-.35-.42-.55-.97-.55-1.55-.01-.68.22-1.36.6-1.93.19.49.53.92.99 1.2.09.06.19.1.28.14-.13.03-.25.08-.37.15-.31.19-.53.51-.58.87z"/>
-                      </svg>
-                    </a>
+                  <div className="network-social-icons" style={{ gap: "20px" }}>
                     {/* LinkedIn */}
                     <a href={socialLinks.linkedin.url} target="_blank" rel="noopener noreferrer" className="social-icon-btn" aria-label="LinkedIn">
                       <svg viewBox="0 0 24 24" fill="currentColor">
@@ -1599,66 +1548,124 @@ export default function Home() {
         {/* FOOTER — Background B (elevated)                                */}
         {/* ================================================================ */}
         <SectionDivider position="left" />
-        <footer className="py-16 px-6 md:px-10" style={{ background: "var(--bg-elevated)" }}>
+        <footer className="pt-16 pb-12 md:pt-16 md:pb-12 px-6 md:px-10" style={{ background: "var(--bg-elevated)" }}>
           <div className="container mx-auto max-w-[1100px]">
-            <div className="footer-terminus mb-12">
-              <button 
-                id="footer-node"
-                className="terminus-node terminus-node-clickable" 
-                onClick={handleFooterNodeClick}
-                aria-label="Circuit terminus"
-              />
-              <div className="terminus-label">// CIRCUIT COMPLETE</div>
-            </div>
             
-            <div className="flex flex-col items-center text-center">
-              {/* Centered logo */}
-              <div className="mb-6">
+            {/* Upper Footer — Two Column Grid */}
+            <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-12 md:gap-12 mb-10">
+              
+              {/* Left Column — Logo + Mission */}
+              <div>
                 <img 
                   src="/NTXCSG_fulllogo_white.png" 
                   alt="NTXCSG - North Texas Cybersecurity Group" 
-                  className="w-[120px] md:w-[140px] h-auto"
+                  className="w-[180px] h-auto mb-5"
                 />
+                <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+                  A practitioner-led cybersecurity community in the Dallas-Fort Worth area. Open to all skill levels. Travelers welcome.
+                </p>
               </div>
               
-              {/* Social links */}
-              <div className="flex flex-wrap justify-center gap-x-5 gap-y-2 mb-6">
-                {Object.values(socialLinks).map((link) => (
-                  <a key={link.label} href={link.url} target="_blank" rel="noopener noreferrer" className="node-link text-xs" style={{ color: "var(--gray)" }}>{link.label}</a>
-                ))}
+              {/* Right Column — Nav + Community */}
+              <div className="grid grid-cols-2 gap-8 md:gap-12">
+                
+                {/* Sub-column A — Navigate */}
+                <div>
+                  <h4 
+                    className="text-[11px] uppercase tracking-[0.15em] mb-4" 
+                    style={{ fontFamily: "var(--font-display)", color: "rgba(57, 255, 20, 0.6)" }}
+                  >
+                    Navigate
+                  </h4>
+                  <nav className="flex flex-col gap-3">
+                    <a href="#calendar" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Meetings</a>
+                    <a href="#practitioners" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Why We Exist</a>
+                    <a href="#history" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Our History</a>
+                    <a href="#ctf" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>CTF</a>
+                    <a href="#network" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>The Network</a>
+                  </nav>
+                </div>
+                
+                {/* Sub-column B — Community */}
+                <div>
+                  <h4 
+                    className="text-[11px] uppercase tracking-[0.15em] mb-4" 
+                    style={{ fontFamily: "var(--font-display)", color: "rgba(57, 255, 20, 0.6)" }}
+                  >
+                    Community
+                  </h4>
+                  <nav className="flex flex-col gap-3">
+                    {Object.values(socialLinks).map((link) => (
+                      <a 
+                        key={link.label} 
+                        href={link.url} 
+                        target="_blank" 
+                        rel="noopener noreferrer" 
+                        className="text-[14px] transition-colors hover:text-white" 
+                        style={{ color: "rgba(255,255,255,0.7)" }}
+                      >
+                        {link.label}
+                      </a>
+                    ))}
+                  </nav>
+                </div>
+              </div>
+            </div>
+            
+            {/* Circuit Trace Divider */}
+            <div className="relative my-10">
+              <div className="w-full h-px" style={{ background: "rgba(57, 255, 20, 0.2)" }} />
+              {/* CTF FLAG 4 TRIGGER — DO NOT REMOVE */}
+              <button 
+                onClick={handleFooterNodeClick}
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full cursor-pointer transition-all hover:scale-150"
+                style={{ background: "rgba(57, 255, 20, 0.4)" }}
+                aria-label="Circuit node"
+              />
+            </div>
+            
+            {/* Bottom Bar */}
+            <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
+              
+              {/* Left — Copyright (centered on mobile, left on desktop) */}
+              <span className="text-[12px] order-2 md:order-1 text-center md:text-left" style={{ color: "rgba(255,255,255,0.4)" }}>
+                &copy; {new Date().getFullYear()} NTXCSG &middot; All rights reserved
+              </span>
+              
+              {/* Center — L0WJ4CK Signature */}
+              <div className="flex flex-col items-center justify-center order-1 md:order-2 text-center">
+                <a 
+                  href="https://www.linkedin.com/in/jacksongiddens/" 
+                  target="_blank" 
+                  rel="noopener noreferrer" 
+                  className="group flex flex-col items-center transition-all"
+                >
+                  <img 
+                    src="/l0wj4ck_signature.svg" 
+                    alt="L0WJ4CK" 
+                    className="w-[260px] md:w-[340px] h-auto opacity-50 transition-all duration-300 group-hover:opacity-100"
+                    style={{ filter: "drop-shadow(0 0 0px transparent)" }}
+                    onMouseEnter={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 8px rgba(57, 255, 20, 0.6))"}
+                    onMouseLeave={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 0px transparent)"}
+                  />
+                  <span 
+                    className="text-[11px] mt-2 text-center" 
+                    style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
+                  >
+                    // designed &amp; built by L0WJ4CK
+                  </span>
+                </a>
               </div>
               
-              {/* Divider */}
-              <div className="w-16 h-px mb-6" style={{ background: "var(--green-dim)" }} />
-              
-              {/* Stats */}
-              <div className="mb-4">
-                <span style={{ fontFamily: "var(--font-data)", fontSize: "10px", letterSpacing: "0.1em", color: "var(--green-dim)" }}>
-                  UPTIME: {new Date().getFullYear() - 2013} YRS · EVENTS: {orgInfo.pastEvents}+ · STILL RUNNING
-                </span>
-              </div>
-              
-              {/* Credit */}
-              <a 
-                href="https://www.linkedin.com/in/jacksongiddens/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="inline-flex items-center justify-center gap-2 transition-opacity hover:opacity-70"
-              >
-                <span style={{ fontFamily: "var(--font-data)", fontSize: "9px", color: "var(--gray-dim)" }}>
-                  Designed &amp; built by
-                </span>
-                <img 
-                  src="/l0wj4ck_signature.svg" 
-                  alt="L0WJ4CK" 
-                  className="h-3 w-auto"
-                  style={{ opacity: 0.7 }}
-                />
-              </a>
+              {/* Right — Placeholder for future link (hidden on mobile) */}
+              <span className="text-[12px] order-3 hidden md:block md:text-right" style={{ color: "rgba(255,255,255,0.2)", minWidth: "140px" }}>
+                {/* Reserved for privacy policy or similar */}
+              </span>
             </div>
           </div>
         </footer>
       </main>
+      </div>
     </>
   )
 }
