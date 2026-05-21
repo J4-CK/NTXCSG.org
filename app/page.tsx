@@ -15,17 +15,12 @@ import {
   sectionLabels,
   faqItems,
 } from "@/config/site-content"
-import { recordFlagById } from "@/lib/ctf-token"
 
 /* ============================================================================
-   CTF FLAG SYSTEM — Now uses signed cookie tokens
+   CTF FLAG SYSTEM — Flags are recorded via manual submission on /ctf
+   Console hints and visual cues show the flag strings, but users must
+   submit them on the scoreboard page to record progress.
    ============================================================================ */
-
-// Wrapper to record flags by ID (async but fire-and-forget)
-function recordFlag(flagId: number) {
-  if (typeof window === "undefined") return
-  recordFlagById(flagId).catch(() => {})
-}
 
 function calcUptimeString(): string {
   const founded = new Date("2013-02-01")
@@ -839,7 +834,7 @@ function ShieldSVG({ onClick, illuminated }: { onClick?: () => void; illuminated
   ╔══════════════════════════════════════════════════╗
   ║  NTXCSG INTERNAL  //  NODE: DFW-NORTH            ║
   ║  If you're reading the source, you're one of us  ║
-  ║  flag{s0urc3_d1v3r_d3t3ct3d}                     ║
+  ║  flag{sourc3_d1v3r_d3t3ct3d}                     ║
   ║  See you the 3rd Thursday.                        ║
   ╚══════════════════════════════════════════════════╝
   */}
@@ -1018,35 +1013,25 @@ export default function Home() {
         + '[DEBUG]   flag{y0u_0pened_th3_c0ns0l3}',
         style.body
       )
-        recordFlag(1) // Flag 1: Console
+      // Flag hint shown - user must submit flag{y0u_0pened_th3_c0ns0l3} on /ctf to record
       
       // L0WJ4CK ASCII art credit (fires with the console easter egg)
-      const l0wj4ckAscii = `
-888      .d8888b.  888      888 888888  d8888  .d8888b.  888   d8P  
-888     d88P  Y88b 888  o   888   "88b d8P888 d88P  Y88b 888  d8P   
-888     888    888 888 d8b  888    888 d8P 888 888    888 888d88K    
-888     888    888 888d888b 888    888 d8P  888 888    888 8888888b   
-888     888    888 8888P Y8888    888 d88   888 888    888 888  Y88b  
-888     888    888 888P   Y888   d88P d8888888888 888    888 888   Y88b 
-888     Y88b  d88P 888    Y88  .d88P d8P     888 Y88b  d88P 888    Y88b
-88888888 "Y8888P"  888     Y8 888P  d8P       888 "Y8888P"  8888888P"  
-                                        .d88P                         
-                                       .d88P"                          
-                                      888P"                            
-`
-      console.log('%c' + l0wj4ckAscii, 'color:#39FF14;font-family:monospace;font-size:8px;line-height:1;')
-      console.log('%c// site by L0WJ4CK — if you found this, you\'re already thinking like a hacker.', 'color:#39FF14;font-family:monospace;font-size:11px;')
+      const l0wj4ckAscii = [
+        "██       ██████  ██     ██    ██ ██   ██  █████   ██████ ██   ██",
+        "██      ██  ████ ██     ██    ██ ██   ██ ██   ██ ██      ██  ██ ",
+        "██      ██ ██ ██ ██  █  ██    ██ ███████ ███████ ██      █████  ",
+        "██      ████  ██ ██ ███ ██ ██ ██      ██ ██   ██ ██      ██  ██ ",
+        "███████  ██████   ███ ███   ████       ██ ██   ██  ██████ ██   ██"
+      ].join('\n')
+      console.log('%c' + l0wj4ckAscii, 'color:#39FF14;font-family:monospace;font-size:10px;line-height:1.2;')
+      console.log('%c// site by L0WJ4CK', 'color:#39FF14;font-family:monospace;font-size:11px;')
     }
 
-    // FLAG 8 — Network Tab fetch (silent, also session-guarded)
+    // FLAG 8 — Network Tab fetch hint (silent, session-guarded)
+    // User must submit the flag from /api/status on /ctf to record
     if (!sessionStorage.getItem('ntxcsg-network-fired')) {
       sessionStorage.setItem('ntxcsg-network-fired', '1')
-      fetch('/api/status')
-        .then(r => r.json())
-        .then(data => {
-          if (data.flag) recordFlag(8) // Flag 8: Network
-        })
-        .catch(() => {})
+      fetch('/api/status').catch(() => {})
     }
   }, [nextMeeting])
 
@@ -1067,7 +1052,7 @@ export default function Home() {
         konamiProgress++
         if (konamiProgress === KONAMI.length) {
           konamiProgress = 0
-          recordFlag(3) // Flag 3: Konami
+          // Show visual feedback - user must submit flag{up_up_d0wn_d0wn} on /ctf
           setShowKonamiOverlay(true)
           setTimeout(() => setShowKonamiOverlay(false), 2500)
         }
@@ -1091,11 +1076,11 @@ export default function Home() {
       if (shieldClickTimer.current) clearTimeout(shieldClickTimer.current)
       shieldClickTimer.current = setTimeout(() => setShieldClicks(0), 2000)
       
-      if (newCount >= 10) {
-        recordFlag(5) // Flag 5: Persistence
-        setShowShieldOverlay(true)
-        setTimeout(() => setShowShieldOverlay(false), 2500)
-        return 0
+  if (newCount >= 10) {
+  // Show visual feedback - user must submit flag{cl1ck_cl1ck_cl1ck} on /ctf
+  setShowShieldOverlay(true)
+  setTimeout(() => setShowShieldOverlay(false), 2500)
+  return 0
       }
       return newCount
     })
@@ -1106,10 +1091,10 @@ export default function Home() {
     console.log('%c[NTXCSG]', 'color: #39FF14; font-family: monospace;')
     console.log('%c' + [
       'You found the end of the circuit.',
-      'flag{b0tt0m_0f_th3_stack}',
-      'Most people never scroll this far.',
+    'flag{b0tt0m_0f_th3_stack}',
+    'Most people never scroll this far.',
     ].join('\n'), 'color: #39FF14; font-family: monospace; font-size: 11px;')
-        recordFlag(4) // Flag 4: Hidden (footer circuit)
+    // Flag hint shown - user must submit flag{b0tt0m_0f_th3_stack} on /ctf
   }, [])
 
   // PASSIVE EASTER EGG — Tab title on idle
@@ -1207,7 +1192,7 @@ export default function Home() {
           {showKonamiOverlay && (
             <div className="ctf-overlay">
               <div className="ctf-overlay-text" style={{ color: "#39FF14" }}>// ACCESS GRANTED</div>
-              <div className="ctf-overlay-flag" style={{ color: "#1C4A1A" }}>flag&#123;k0nam1_h4ck3r&#125;</div>
+              <div className="ctf-overlay-flag" style={{ color: "#39FF14" }}>flag&#123;k0nam1_h4ck3r&#125;</div>
             </div>
           )}
           
@@ -1216,7 +1201,7 @@ export default function Home() {
             <div className="ctf-overlay">
 {/* Intentional: CTF overlay uses fixed sizes for dramatic effect */}
                   <div className="ctf-overlay-text" style={{ color: "var(--red)", fontSize: "var(--text-label)" }}>UNAUTHORIZED ACCESS ATTEMPT DETECTED</div>
-                  <div className="ctf-overlay-close">[×]</div>
+                  <div className="ctf-overlay-flag" style={{ color: "#39FF14" }}>flag&#123;p3rs1st3nc3_1s_k3y&#125;</div>
                   <div className="ctf-overlay-text" style={{ color: "var(--gray-dim)", fontStyle: "italic", fontSize: "var(--text-caption)" }}>nice persistence though</div>
             </div>
           )}
@@ -1552,56 +1537,56 @@ export default function Home() {
           <div className="container mx-auto max-w-[1100px]">
             
             {/* Upper Footer — Two Column Grid */}
-            <div className="grid grid-cols-1 md:grid-cols-[320px_1fr] gap-12 md:gap-12 mb-10">
+            <div className="grid grid-cols-1 lg:grid-cols-[320px_1fr] gap-10 lg:gap-12 mb-10">
               
               {/* Left Column — Logo + Mission */}
-              <div>
+              <div className="text-center lg:text-left">
                 <img 
                   src="/NTXCSG_fulllogo_white.png" 
                   alt="NTXCSG - North Texas Cybersecurity Group" 
-                  className="w-[180px] h-auto mb-5"
+                  className="w-[160px] lg:w-[180px] h-auto mb-5 mx-auto lg:mx-0"
                 />
-                <p className="text-[13px] leading-relaxed" style={{ color: "rgba(255,255,255,0.5)" }}>
+                <p className="text-[13px] leading-relaxed max-w-[280px] mx-auto lg:mx-0" style={{ color: "rgba(255,255,255,0.5)" }}>
                   A practitioner-led cybersecurity community in the Dallas-Fort Worth area. Open to all skill levels. Travelers welcome.
                 </p>
               </div>
               
               {/* Right Column — Nav + Community */}
-              <div className="grid grid-cols-2 gap-8 md:gap-12">
+              <div className="grid grid-cols-2 gap-8 lg:gap-12">
                 
                 {/* Sub-column A — Navigate */}
-                <div>
+                <div className="text-center lg:text-left">
                   <h4 
                     className="text-[11px] uppercase tracking-[0.15em] mb-4" 
                     style={{ fontFamily: "var(--font-display)", color: "rgba(57, 255, 20, 0.6)" }}
                   >
                     Navigate
                   </h4>
-                  <nav className="flex flex-col gap-3">
-                    <a href="#calendar" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Meetings</a>
-                    <a href="#practitioners" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Why We Exist</a>
-                    <a href="#history" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Our History</a>
-                    <a href="#ctf" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>CTF</a>
-                    <a href="#network" className="text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>The Network</a>
+                  <nav className="flex flex-col gap-2 lg:gap-3">
+                    <a href="#calendar" className="text-[13px] lg:text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Meetings</a>
+                    <a href="#practitioners" className="text-[13px] lg:text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Why We Exist</a>
+                    <a href="#history" className="text-[13px] lg:text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>Our History</a>
+                    <a href="#ctf" className="text-[13px] lg:text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>CTF</a>
+                    <a href="#network" className="text-[13px] lg:text-[14px] transition-colors hover:text-white" style={{ color: "rgba(255,255,255,0.7)" }}>The Network</a>
                   </nav>
                 </div>
                 
                 {/* Sub-column B — Community */}
-                <div>
+                <div className="text-center lg:text-left">
                   <h4 
                     className="text-[11px] uppercase tracking-[0.15em] mb-4" 
                     style={{ fontFamily: "var(--font-display)", color: "rgba(57, 255, 20, 0.6)" }}
                   >
                     Community
                   </h4>
-                  <nav className="flex flex-col gap-3">
+                  <nav className="flex flex-col gap-2 lg:gap-3">
                     {Object.values(socialLinks).map((link) => (
                       <a 
                         key={link.label} 
                         href={link.url} 
                         target="_blank" 
                         rel="noopener noreferrer" 
-                        className="text-[14px] transition-colors hover:text-white" 
+                        className="text-[13px] lg:text-[14px] transition-colors hover:text-white" 
                         style={{ color: "rgba(255,255,255,0.7)" }}
                       >
                         {link.label}
@@ -1625,41 +1610,61 @@ export default function Home() {
             </div>
             
             {/* Bottom Bar */}
-            <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
-              
-              {/* Left — Copyright (centered on mobile, left on desktop) */}
-              <span className="text-[12px] order-2 md:order-1 text-center md:text-left" style={{ color: "rgba(255,255,255,0.4)" }}>
+            <div className="hidden md:flex md:flex-row md:items-center md:justify-between">
+              {/* Left — Copyright */}
+              <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>
                 &copy; {new Date().getFullYear()} NTXCSG &middot; All rights reserved
               </span>
               
-              {/* Center — L0WJ4CK Signature */}
-              <div className="flex flex-col items-center justify-center order-1 md:order-2 text-center">
-                <a 
-                  href="https://www.linkedin.com/in/jacksongiddens/" 
-                  target="_blank" 
-                  rel="noopener noreferrer" 
-                  className="group flex flex-col items-center transition-all"
+              {/* Right — L0WJ4CK Signature */}
+              <a 
+                href="https://www.linkedin.com/in/jacksongiddens/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="group flex flex-col items-end transition-all"
+              >
+                <img 
+                  src="/l0wj4ck_signature.svg" 
+                  alt="L0WJ4CK" 
+                  className="w-[300px] h-auto opacity-50 transition-all duration-300 group-hover:opacity-100"
+                  style={{ filter: "drop-shadow(0 0 0px transparent)" }}
+                  onMouseEnter={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 8px rgba(57, 255, 20, 0.6))"}
+                  onMouseLeave={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 0px transparent)"}
+                />
+                <span 
+                  className="text-[11px] mt-2 text-right" 
+                  style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
                 >
-                  <img 
-                    src="/l0wj4ck_signature.svg" 
-                    alt="L0WJ4CK" 
-                    className="w-[260px] md:w-[340px] h-auto opacity-50 transition-all duration-300 group-hover:opacity-100"
-                    style={{ filter: "drop-shadow(0 0 0px transparent)" }}
-                    onMouseEnter={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 8px rgba(57, 255, 20, 0.6))"}
-                    onMouseLeave={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 0px transparent)"}
-                  />
-                  <span 
-                    className="text-[11px] mt-2 text-center" 
-                    style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
-                  >
-                    // designed &amp; built by L0WJ4CK
-                  </span>
-                </a>
-              </div>
+                  // designed &amp; built by L0WJ4CK
+                </span>
+              </a>
+            </div>
+            
+            {/* Mobile Bottom Bar */}
+            <div className="flex md:hidden flex-col items-center gap-6 pt-4">
+              {/* L0WJ4CK Signature */}
+              <a 
+                href="https://www.linkedin.com/in/jacksongiddens/" 
+                target="_blank" 
+                rel="noopener noreferrer" 
+                className="flex flex-col items-center"
+              >
+                <img 
+                  src="/l0wj4ck_signature.svg" 
+                  alt="L0WJ4CK" 
+                  className="w-[220px] h-auto opacity-50"
+                />
+                <span 
+                  className="text-[10px] mt-2 text-center" 
+                  style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
+                >
+                  // designed &amp; built by L0WJ4CK
+                </span>
+              </a>
               
-              {/* Right — Placeholder for future link (hidden on mobile) */}
-              <span className="text-[12px] order-3 hidden md:block md:text-right" style={{ color: "rgba(255,255,255,0.2)", minWidth: "140px" }}>
-                {/* Reserved for privacy policy or similar */}
+              {/* Copyright */}
+              <span className="text-[11px] text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
+                &copy; {new Date().getFullYear()} NTXCSG &middot; All rights reserved
               </span>
             </div>
           </div>

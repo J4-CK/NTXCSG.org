@@ -3,7 +3,6 @@
 import { useState, useEffect, useCallback, useRef } from "react"
 import { 
   getCTFProgress, 
-  recordFlagById, 
   recordFlagByValue,
   validateFlagFormat,
   FLAG_REGISTRY,
@@ -27,6 +26,12 @@ const FLAG_CATEGORIES = Object.entries(FLAG_REGISTRY).map(([id, data]) => ({
 function TypewriterText({ text, onComplete, speed = 30 }: { text: string; onComplete?: () => void; speed?: number }) {
   const [displayed, setDisplayed] = useState("")
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
+  const onCompleteRef = useRef(onComplete)
+  
+  // Keep ref updated with latest callback without triggering re-render
+  useEffect(() => {
+    onCompleteRef.current = onComplete
+  }, [onComplete])
   
   useEffect(() => {
     const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -36,7 +41,7 @@ function TypewriterText({ text, onComplete, speed = 30 }: { text: string; onComp
   useEffect(() => {
     if (prefersReducedMotion) {
       setDisplayed(text)
-      onComplete?.()
+      onCompleteRef.current?.()
       return
     }
     
@@ -48,11 +53,11 @@ function TypewriterText({ text, onComplete, speed = 30 }: { text: string; onComp
         i++
       } else {
         clearInterval(interval)
-        onComplete?.()
+        onCompleteRef.current?.()
       }
     }, speed)
     return () => clearInterval(interval)
-  }, [text, speed, onComplete, prefersReducedMotion])
+  }, [text, speed, prefersReducedMotion]) // Removed onComplete from deps - use ref instead
   
   return <span>{displayed}<span className="terminal-cursor">_</span></span>
 }
@@ -74,18 +79,17 @@ export default function CTFPage() {
   }, [])
 
   useEffect(() => {
-    // Flag 9 — CTF Scoreboard Meta (fires once per session)
-    if (!sessionStorage.getItem('ntxcsg-ctf-meta-fired')) {
-      sessionStorage.setItem('ntxcsg-ctf-meta-fired', '1')
+    // Show hint in console that this page has a flag (but don't auto-record)
+    if (!sessionStorage.getItem('ntxcsg-ctf-meta-shown')) {
+      sessionStorage.setItem('ntxcsg-ctf-meta-shown', '1')
       console.log("%c[NTXCSG]", "color: #39FF14; font-family: monospace;")
       console.log(
         "%c" + ["You found the scoreboard.", "That counts.", "flag{y0u_kn3w_wh3r3_t0_l00k}"].join("\n"),
         "color: #39FF14; font-family: monospace; font-size: 11px;"
       )
-      recordFlagById(9) // Flag 9: Meta
     }
 
-    // Load found flags
+    // Load found flags from cookie
     refreshScoreboard()
 
     // Listen for flag updates from other components
@@ -519,42 +523,60 @@ export default function CTFPage() {
             />
           </div>
           
-          {/* Bottom Bar */}
-          <div className="flex flex-col items-center gap-6 md:flex-row md:justify-between">
-            
-            {/* Left — Copyright (centered on mobile, left on desktop) */}
-            <span className="text-[12px] order-2 md:order-1 text-center md:text-left" style={{ color: "rgba(255,255,255,0.4)" }}>
+          {/* Bottom Bar — Desktop */}
+          <div className="hidden md:flex md:flex-row md:items-center md:justify-between">
+            {/* Left — Copyright */}
+            <span className="text-[12px]" style={{ color: "rgba(255,255,255,0.4)" }}>
               &copy; {new Date().getFullYear()} NTXCSG &middot; All rights reserved
             </span>
             
-            {/* Center — L0WJ4CK Signature */}
-            <div className="flex flex-col items-center justify-center order-1 md:order-2 text-center">
-              <a 
-                href="https://www.linkedin.com/in/jacksongiddens/" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="group flex flex-col items-center transition-all"
+            {/* Right — L0WJ4CK Signature */}
+            <a 
+              href="https://www.linkedin.com/in/jacksongiddens/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="group flex flex-col items-end transition-all"
+            >
+              <img 
+                src="/l0wj4ck_signature.svg" 
+                alt="L0WJ4CK" 
+                className="w-[300px] h-auto opacity-50 transition-all duration-300 group-hover:opacity-100"
+                style={{ filter: "drop-shadow(0 0 0px transparent)" }}
+                onMouseEnter={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 8px rgba(57, 255, 20, 0.6))"}
+                onMouseLeave={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 0px transparent)"}
+              />
+              <span 
+                className="text-[11px] mt-2 text-right" 
+                style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
               >
-                <img 
-                  src="/l0wj4ck_signature.svg" 
-                  alt="L0WJ4CK" 
-                  className="w-[260px] md:w-[340px] h-auto opacity-50 transition-all duration-300 group-hover:opacity-100"
-                  style={{ filter: "drop-shadow(0 0 0px transparent)" }}
-                  onMouseEnter={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 8px rgba(57, 255, 20, 0.6))"}
-                  onMouseLeave={(e) => e.currentTarget.style.filter = "drop-shadow(0 0 0px transparent)"}
-                />
-                <span 
-                  className="text-[11px] mt-2 text-center" 
-                  style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
-                >
-                  // designed &amp; built by L0WJ4CK
-                </span>
-              </a>
-            </div>
+                // designed &amp; built by L0WJ4CK
+              </span>
+            </a>
+          </div>
+          
+          {/* Bottom Bar — Mobile */}
+          <div className="flex md:hidden flex-col items-center gap-6 pt-4">
+            <a 
+              href="https://www.linkedin.com/in/jacksongiddens/" 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="flex flex-col items-center"
+            >
+              <img 
+                src="/l0wj4ck_signature.svg" 
+                alt="L0WJ4CK" 
+                className="w-[220px] h-auto opacity-50"
+              />
+              <span 
+                className="text-[10px] mt-2 text-center" 
+                style={{ fontFamily: "var(--font-mono)", color: "rgba(255,255,255,0.3)" }}
+              >
+                // designed &amp; built by L0WJ4CK
+              </span>
+            </a>
             
-            {/* Right — Placeholder (hidden on mobile) */}
-            <span className="text-[12px] order-3 hidden md:block md:text-right" style={{ color: "rgba(255,255,255,0.2)", minWidth: "140px" }}>
-              {/* Reserved for future link */}
+            <span className="text-[11px] text-center" style={{ color: "rgba(255,255,255,0.4)" }}>
+              &copy; {new Date().getFullYear()} NTXCSG &middot; All rights reserved
             </span>
           </div>
         </div>
